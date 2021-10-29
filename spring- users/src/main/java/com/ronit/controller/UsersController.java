@@ -1,8 +1,6 @@
 package com.ronit.controller;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,36 +39,47 @@ public class UsersController {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getUserById(@PathVariable("id") Integer id) {
-		User user = userService.getUser(id);
-		return new ResponseEntity<User>(user, HttpStatus.OK);
-//		return new ResponseEntity<User>(userService.getUser(id), HttpStatus.ACCEPTED);
-//		System.out.println(user);
-//		return user;
+		try {
+			User user = userService.getUser(id);
+			return new ResponseEntity<>(user, HttpStatus.OK);
+		} catch (UserExceptions e) {
+			ResponseDto responsdto = new ResponseDto(false, e.getMessage());
+			return new ResponseEntity<>(responsdto, HttpStatus.NOT_FOUND);
+		}
 	}
 
 	@PostMapping
-	public ResponseEntity<?> addUser(@RequestBody User user) {
-		userService.addUser(user);
-		return new ResponseEntity(HttpStatus.CREATED);
+	public ResponseEntity<ResponseDto> addUser(@RequestBody User user) {
+		try {
+			userService.addUser(user);
+			ResponseDto responsdto = new ResponseDto(true, "user added");
+			return new ResponseEntity<>(responsdto, HttpStatus.CREATED);
+		} catch (InvalidOperationException e) {
+			ResponseDto responsdto = new ResponseDto(false, e.getMessage());
+			return new ResponseEntity<ResponseDto>(responsdto, HttpStatus.BAD_REQUEST);
+		}
 
 	}
 
 	@PutMapping
 	public ResponseEntity<?> updateUser(@RequestBody User user) throws UserExceptions, InvalidOperationException {
 		userService.updateUser(user);
-//			ResponseDto responseDto = new ResponseDto(true, "updateUser successfully");
-		Map<String, Object> response = new HashMap<String, Object>();
-		response.put("success", true);
-		response.put("message", "user updateUser successfully");
-		return new ResponseEntity<Map>(response, HttpStatus.OK);
+		ResponseDto responseDto = new ResponseDto(true, "updateUser successfully");
+		return new ResponseEntity<ResponseDto>(responseDto, HttpStatus.OK);
+//		Map<String, Object> response = new HashMap<String, Object>();
+//		response.put("success", true);
+//		response.put("message", "user updateUser successfully");
+//		return new ResponseEntity<Map>(response, HttpStatus.OK);
 
 	}
 
-	@DeleteMapping
+	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteUser(@PathVariable("id") Integer id) {
 		try {
 			userService.deleteUser(id);
-			return new ResponseEntity(HttpStatus.CREATED);
+			return new ResponseEntity<>("user deleted", HttpStatus.OK);
+			//			return new ResponseEntity(HttpStatus.CREATED);
+
 		} catch (UserExceptions e) {
 			ResponseDto responsdto = new ResponseDto(false, e.getMessage());
 			return new ResponseEntity<ResponseDto>(responsdto, HttpStatus.OK);
