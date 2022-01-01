@@ -52,6 +52,7 @@ public class UsersController {
 	public ResponseEntity<ResponseDto> addUser(@RequestBody User user) {
 		try {
 			userService.addUser(user);
+			// userService.save(user).getId();
 			ResponseDto responsdto = new ResponseDto(true, "user added");
 			return new ResponseEntity<>(responsdto, HttpStatus.CREATED);
 		} catch (InvalidOperationException e) {
